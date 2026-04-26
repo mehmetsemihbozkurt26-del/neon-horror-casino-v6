@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neon Casino V6 FINAL</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#000;
+  color:#0ff;
+  text-align:center;
+}
+
+#login,#game,#admin{padding:20px;}
+
+input,select,button{
+  padding:12px;
+  margin:5px;
+  border:none;
+  border-radius:10px;
+  font-size:16px;
+  width:90%;
+  max-width:300px;
+}
+
+button{
+  background:#0ff;
+  color:#000;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.box{
+  background:#111;
+  border:1px solid #0ff;
+  padding:10px;
+  margin:10px auto;
+  width:95%;
+  max-width:300px;
+}
+
+#jumpscare{
+  position:fixed;
+  inset:0;
+  background:black;
+  color:red;
+  font-size:120px;
+  display:none;
+  justify-content:center;
+  align-items:center;
+}
+</style>
+</head>
+
+<body>
+
+<div id="login">
+<h2>🎰 NEON CASINO V6</h2>
+<input id="name" placeholder="İsim">
+<input id="email" placeholder="E-posta">
+<button onclick="start()">ENTER</button>
+</div>
+
+<div id="game" style="display:none">
+<h3>💰 Coin: <span id="coin">100</span></h3>
+
+<select id="bet">
+<option value="10">10</option>
+<option value="20">20</option>
+<option value="50">50</option>
+<option value="100">100</option>
+</select>
+
+<div class="box">
+<h4>🎰 SLOT</h4>
+<button onclick="slot()">SPIN</button>
+<p id="slot"></p>
+</div>
+
+<div class="box">
+<h4>🪙 FLIP</h4>
+<button onclick="flip()">FLIP</button>
+<p id="flip"></p>
+</div>
+
+<div class="box">
+<h4>💣 MINE</h4>
+<button onclick="mine()">DIG</button>
+<p id="mineText"></p>
+</div>
+</div>
+
+<div id="jumpscare">💀</div>
+
+<div id="admin" style="display:none">
+<h3>👑 ADMIN</h3>
+
+<p>Oyuncular</p>
+<div id="players"></div>
+
+<select id="scare">
+<option value="💀">Klasik</option>
+<option value="👁">Göz</option>
+<option value="🩸">Kan</option>
+</select>
+
+<button onclick="addCoin()">+100 Coin</button>
+<button onclick="removeCoin()">-50 Coin</button>
+<button onclick="msg()">Mesaj</button>
+<button onclick="jump()">Jumpscare</button>
+<button onclick="bots()">Bot Simülasyon</button>
+</div>
+
+<script>
+let coin=100;
+let players=[];
+
+function start(){
+  let name=document.getElementById("name").value;
+  let email=document.getElementById("email").value;
+
+  players.push({name,email,coin});
+
+  document.getElementById("login").style.display="none";
+  document.getElementById("game").style.display="block";
+  document.getElementById("admin").style.display="block";
+
+  update();
+}
+
+function bet(){return parseInt(document.getElementById("bet").value);}
+
+/* OYUNLAR */
+function slot(){
+  let b=bet();
+  if(coin<b)return alert("Yetersiz coin");
+  coin-=b;
+
+  let s=["💀","🩸","👁","🔪"];
+  let a=s[Math.random()*4|0];
+  let c=s[Math.random()*4|0];
+  let d=s[Math.random()*4|0];
+
+  document.getElementById("slot").innerText=a+" "+c+" "+d;
+
+  if(a==c && c==d) coin+=b*2;
+
+  update();
+}
+
+function flip(){
+  let b=bet();
+  if(coin<b)return alert("Yetersiz coin");
+  coin-=b;
+
+  let r=Math.random()<0.5?"HEADS":"TAILS";
+  document.getElementById("flip").innerText=r;
+
+  if(r=="HEADS") coin+=b*2;
+
+  update();
+}
+
+function mine(){
+  let b=bet();
+  if(coin<b)return alert("Yetersiz coin");
+  coin-=b;
+
+  if(Math.random()<0.3){
+    document.getElementById("mineText").innerText="💥 DEAD";
+    jump();
+  }else{
+    document.getElementById("mineText").innerText="✔ SAFE";
+  }
+
+  update();
+}
+
+/* ADMIN */
+function addCoin(){coin+=100;update();}
+function removeCoin(){coin=Math.max(0,coin-50);update();}
+function msg(){alert("ADMIN MESAJ");}
+
+function jump(){
+  let j=document.getElementById("jumpscare");
+  j.innerText=document.getElementById("scare").value;
+  j.style.display="flex";
+  setTimeout(()=>j.style.display="none",500);
+}
+
+/* PLAYERS */
+function update(){
+  document.getElementById("coin").innerText=coin;
+
+  if(players.length>0){
+    players[0].coin=coin;
+  }
+
+  let div=document.getElementById("players");
+  div.innerHTML="";
+  players.forEach(p=>{
+    div.innerHTML+=`<p>${p.name} - ${p.coin}</p>`;
+  });
+}
+
+/* BOT */
+function bots(){
+  for(let i=1;i<=3;i++){
+    players.push({name:"Bot"+i,coin:100});
+  }
+
+  setInterval(()=>{
+    players.forEach(p=>{
+      let b=10;
+
+      if(Math.random()<0.5) p.coin+=b;
+      else p.coin-=b;
+
+      if(p.coin<0)p.coin=0;
+    });
+
+    update();
+  },1500);
+}
+</script>
+
+</body>
+</html>
